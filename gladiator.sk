@@ -1,0 +1,134 @@
+# Commands and what they do
+# /gladiatorstart - starts the event
+# /event - lets any player to join the event
+# /showplayers - shows the players in the event
+# /gladiatorstop - stops the event
+# /startfight <player> <player> - starts a fight between two players when they are in the event
+# /eventkick <player> - kicks a player from the event
+
+variables:
+    {prefix} = "&6Event &7>> &b" # Change this to your prefix
+    {eventstatus} = "off"
+    {gladiator.players::*} = "none"
+command /gladiatorstart:
+    description: Gladiator event start
+    usage: /gladiatorstart
+    permission: event.admin
+    permission message: &cYou do not have permission to use this command!
+    trigger:
+        set {eventstatus} to "on"
+        broadcast "%{prefix}% Gladiator event has started! use /event to join! Be sure to have an empty inventory!"
+
+command /event:
+    description: Join the event
+    usage: /event
+    trigger:
+        if player's inventory is empty:
+            if {gladiator.players::*} contains player:
+                send "%{prefix}% &cYou are already in the event!"
+            else:
+                add player to {gladiator.players::*}
+                broadcast "%{prefix}% %player% has joined the event!"
+                teleport player to location 84.447, 82, -177.495 # Change this to the spectating area
+        else:
+            send "%{prefix}% &cYou must have an empty inventory to join the event!"
+
+command /showplayers:
+    description: Show players in event
+    usage: /showplayers
+    permission: event.admin
+    permission message: &cYou do not have permission to use this command!
+    trigger:
+        send "%{prefix}% Players in event: %{gladiator.players::*}%"
+
+command /gladiatorstop:
+    description: Gladiator event stop
+    usage: /gladiatorstop
+    permission: event.admin
+    permission message: &cYou do not have permission to use this command!
+    trigger:
+        if {gladiator.players::*} contains players:
+            console command "/clearinventory %player%"
+        broadcast "%{prefix}% Gladiator event has ended!"
+        delete {gladiator.players::*}
+        set {eventstatus} to "off"
+
+command /startfight <player> <player>:
+    description: Start fight between two players
+    usage: /startfight <player> <player>
+    permission: event.admin
+    permission message: &cYou do not have permission to use this command!
+    trigger:
+        if {gladiator.players::*} contains arg-1:
+            if {gladiator.players::*} contains arg-2:
+                teleport arg-1 to location 77.586, 79, -166.385 # Change this to the location of player 1
+                teleport arg-2 to location 77.464, 74, -154.492 # Change this to the location of player 2
+                broadcast "%{prefix}% %arg-1% &7VS &b%arg-2%"
+                #items to give
+                give arg-1 iron sword named "&c&lGladiator Sword" with lore "&7&lGladiator Sword"
+                give arg-2 iron sword named "&c&lGladiator Sword" with lore "&7&lGladiator Sword"
+                give arg-1 iron helmet named "&c&lGladiator Helmet" with lore "&7&lGladiator Helmet"
+                give arg-2 iron helmet named "&c&lGladiator Helmet" with lore "&7&lGladiator Helmet"
+                give arg-1 iron chestplate named "&c&lGladiator Chestplate" with lore "&7&lGladiator Chestplate"
+                give arg-2 iron chestplate named "&c&lGladiator Chestplate" with lore "&7&lGladiator Chestplate"
+                give arg-1 iron leggings named "&c&lGladiator Leggings" with lore "&7&lGladiator Leggings"
+                give arg-2 iron leggings named "&c&lGladiator Leggings" with lore "&7&lGladiator Leggings"
+                give arg-1 iron boots named "&c&lGladiator Boots" with lore "&7&lGladiator Boots"
+                give arg-2 iron boots named "&c&lGladiator Boots" with lore "&7&lGladiator Boots"
+                give arg-1 shield named "&c&lGladiator Shield" with lore "&7&lGladiator Shield"
+                give arg-2 shield named "&c&lGladiator Shield" with lore "&7&lGladiator Shield"
+            else:
+                send "%{prefix}% %arg-2% is not in the event!"
+        else:
+            send "%{prefix}% %arg-1% is not in the event!"
+
+on death:
+    if {eventstatus} is "on":
+        if attacker is player:
+            if {gladiator.players::*} contains attacker:
+                teleport attacker to location 84.447, 82, -177.495 # Change this to the spectating area
+        victim is player:
+            if {gladiator.players::*} contains victim:
+                remove victim from {gladiator.players::*}
+                broadcast "%{prefix}% %victim% has died in the event!"
+                if {gladiator.players::*} is empty:
+                    broadcast "%{prefix}% Gladiator event has ended!"
+                    delete {gladiator.players::*}
+                    set {eventstatus} to "off"
+                else:
+                    broadcast "%{prefix}% Players in event: %{gladiator.players::*}%"
+            else:
+                broadcast "%{prefix}% %victim% has died in the event!"
+                if {gladiator.players::*} is empty:
+                    broadcast "%{prefix}% Gladiator event has ended!"
+                    delete {gladiator.players::*}
+                    set {eventstatus} to "off"
+                else:
+                    broadcast "%{prefix}% Players in event: %{gladiator.players::*}%"
+
+command /eventkick <player>:
+    description: Kick a player from the event
+    usage: /eventkick <player>
+    permission: event.admin
+    permission message: &cYou do not have permission to use this command!
+    trigger:
+        if player has permission "event.eventkick":
+            if {gladiator.players::*} contains arg-1:
+                remove arg-1 from {gladiator.players::*}
+                broadcast "%{prefix}% %arg-1% has been kicked from the event!"
+                console command "kill %arg-1%"
+            else:
+                send "%{prefix}% %arg-1% is not in the event!"
+        else:
+            send "%{prefix}% %player% does not have permission to kick a player from the event!"
+
+on quit:
+    if {gladiator.players::*} contains player:
+        remove player from {gladiator.players::*}
+        broadcast "%{prefix}% %player% has left the event!"
+        if {gladiator.players::*} is empty:
+            broadcast "%{prefix}% Gladiator event has ended!"
+            delete {gladiator.players::*}
+            set {eventstatus} to "off"
+        else:
+            broadcast "%{prefix}% Players in event: %{gladiator.players::*}%"
