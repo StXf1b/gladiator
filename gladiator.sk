@@ -13,7 +13,7 @@ variables:
 command /gladiatorstart:
     description: Gladiator event start
     usage: /gladiatorstart
-    permission: event.admin
+    permission: event.start
     permission message: &cYou do not have permission to use this command!
     trigger:
         set {eventstatus} to "on"
@@ -36,7 +36,7 @@ command /event:
 command /showplayers:
     description: Show players in event
     usage: /showplayers
-    permission: event.admin
+    permission: event.showplayers
     permission message: &cYou do not have permission to use this command!
     trigger:
         send "%{prefix}% Players in event: %{gladiator.players::*}%"
@@ -44,7 +44,7 @@ command /showplayers:
 command /gladiatorstop:
     description: Gladiator event stop
     usage: /gladiatorstop
-    permission: event.admin
+    permission: event.stop
     permission message: &cYou do not have permission to use this command!
     trigger:
         if {gladiator.players::*} contains players:
@@ -56,7 +56,7 @@ command /gladiatorstop:
 command /startfight <player> <player>:
     description: Start fight between two players
     usage: /startfight <player> <player>
-    permission: event.admin
+    permission: event.startfight
     permission message: &cYou do not have permission to use this command!
     trigger:
         if {gladiator.players::*} contains arg-1:
@@ -109,7 +109,7 @@ on death:
 command /eventkick <player>:
     description: Kick a player from the event
     usage: /eventkick <player>
-    permission: event.admin
+    permission: event.kick
     permission message: &cYou do not have permission to use this command!
     trigger:
         if player has permission "event.eventkick":
